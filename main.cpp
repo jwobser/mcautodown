@@ -11,6 +11,7 @@ using std::regex;
 using std::string;
 using std::cout;
 using std::smatch;
+using std::filesystem::exists;
 
 // using std::filesystem::exists;
 // namespace fs = std::filesystem;
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]){
 	cout << "There are: " << players[1] << " players online\n";
 	cout << "The whole match is: " << players[0] << "\n";
 	printf("Formatted as int: %i \t Formatted as hex: %#0.2x \n", playercount, playercount);
-	if ( std::filesystem::exists("server.empty") ) {
+	if ( exists("server.empty") ) {
 		cout << "Server has been empty for " << TIMEOUT << " minutes. Initiating shutdown.\n";
 	} else {
 		cout << "Server is active.\n";
