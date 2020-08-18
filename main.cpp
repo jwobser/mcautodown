@@ -3,6 +3,8 @@
 // #include <system>
 #include <string>
 #include <filesystem>
+#include <fstream>
+#include <cassert>
 // N0la rcon lib - https://github.com/n0la/rcon
 // #include "rcon/rcon.h"
 // Discord Library - https://github.com/zeroxs/aegis.cpp
@@ -16,9 +18,16 @@ using std::filesystem::exists;
 // using std::filesystem::exists;
 // namespace fs = std::filesystem;
 const int TIMEOUT {5};
+const std::filesystem::path confpath {"mcdown.conf"};
 
 int main(int argc, char *argv[]){
 	// Read RCON configuration file
+	string line;
+	assert(exists(confpath));
+	std::ifstream cf {confpath};
+	while (std::getline(cf, line)){
+		cout << line << '\n';
+	};
 
 	// Open RCON connection
 
