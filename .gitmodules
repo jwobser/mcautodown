@@ -1,3 +1,6 @@
 [submodule "rcon"]
 	path = rcon
 	url = git@github.com:n0la/rcon.git
+[submodule "tomlplusplus"]
+	path = tomlplusplus
+	url = git@github.com:marzer/tomlplusplus.git

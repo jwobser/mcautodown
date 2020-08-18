@@ -1,33 +1,45 @@
 #include <regex>
 #include <iostream>
-// #include <system>
 #include <string>
+#include <string_view>
 #include <filesystem>
 #include <fstream>
 #include <cassert>
+
 // N0la rcon lib - https://github.com/n0la/rcon
 // #include "rcon/rcon.h"
+
 // Discord Library - https://github.com/zeroxs/aegis.cpp
 // #include <aegis.hpp>
+
+// TOML Parsing Lib
+#include "tomlplusplus/toml.hpp"
+
 using std::regex;
 using std::string;
+using std::string_view;
 using std::cout;
 using std::smatch;
 using std::filesystem::exists;
+using namespace std::literals;
 
-// using std::filesystem::exists;
-// namespace fs = std::filesystem;
 const int TIMEOUT {5};
-const std::filesystem::path confpath {"mcdown.conf"};
+const std::filesystem::path confpath {"mcdown.yaml"};
+const string cp = "mcdown.toml";
 
 int main(int argc, char *argv[]){
 	// Read RCON configuration file
+	auto config = toml::parse_file(cp);
+	string_view serveraddr = config["rcon"]["addr"].value_or(""sv);
+	cout << "Server addr: " << serveraddr << '\n';
+	/*
 	string line;
 	assert(exists(confpath));
 	std::ifstream cf {confpath};
 	while (std::getline(cf, line)){
 		cout << line << '\n';
 	};
+	*/
 
 	// Open RCON connection
 
