@@ -27,14 +27,14 @@ using std::filesystem::exists;
 using std::filesystem::remove;
 using namespace std::literals;
 
-const int TIMEOUT {5};
+// const int TIMEOUT {5};
 const std::filesystem::path confpath {"mcdown.yaml"};
 const string cp = "mcdown.toml";
 
 int main(int argc, char *argv[]){
 	// Read RCON configuration file
 	auto config = toml::parse_file(cp);
-	string_view serveraddr = config["rcon"]["addr"].value_or(""sv);
+	// string_view serveraddr = config["rcon"]["addr"].value_or(""sv);
 	bool serverempty = config["server"]["empty"].value_or(false);
 	// cout << "Server addr: " << serveraddr << '\n';
 	// cout << "Server empty flag: " << serverempty << "\n";
@@ -79,31 +79,29 @@ int main(int argc, char *argv[]){
 		*/
 
 		// TODO: notify discord
-	} else if (playercount == 0){
-			// update server empty flag to false
-			std::fstream configfile;
-			string buffer;
-			configfile.open(cp);
-			getline(configfile, buffer);
-		while(!configfile.eof()){
-			if(buffer.length()<5) continue;
-			string key = buffer.substr(0,5);
-			if(key.compare("empty") == 0){
-				bool boolEmpty;
-				std::size_t pos = buffer.find('=');
-				string value = buffer.substr(pos+2,5);
-				std::istringstream vstream {value};
-				vstream >> std::boolalpha >> boolEmpty;
-				cout << "Pos of \"=\" : " << pos << '\n';
-				cout << "Key : Value = [" << key << ":" << value <<"]\n";
-				cout << std::boolalpha << boolEmpty << "\n";
-				configfile.seekg(-(1+buffer.length()),std::ios_base::cur);
-				configfile << "empty = " << std::boolalpha << !boolEmpty << '\0\0';
+	} 
+
+	std::fstream configfile;
+	string buffer;
+	configfile.open(cp);
+	while(!configfile.eof()){
+		getline(configfile, buffer);
+		if(buffer.length()<5) continue;
+		string key = buffer.substr(0,5);
+		if(key.compare("empty") == 0){
+			// go to beginning of line
+			configfile.seekg(-(1+buffer.length()),std::ios_base::cur);
+
+			/* Only change flag to empty if server runnign and empty
+			 * Otherwise, reset to false. that way server will not turn
+			 * off immediately at next reboot
+			 */
+			if (!serverempty && playercount == 0){
+				configfile << "empty = true \n";
+			} else {
+				configfile << "empty = false\n";
 			}
-			getline(configfile, buffer);
 		}
-	configfile.close();
-	} else {
-		// remove("server.empty");
 	}
+	configfile.close();
 }
