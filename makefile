@@ -6,4 +6,4 @@ main: main.o
 main.o: main.cpp
 
 clean:
-	rm main.o main
+	rm main.o main 
