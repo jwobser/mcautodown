@@ -1,6 +1,7 @@
 [rcon]
 addr = "127.0.0.1"
 passwd = "your_PW_here"
+port = 25575
 
 [discord]
 token = ""
