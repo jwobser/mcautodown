@@ -1,3 +1,4 @@
+// #define DEBUG 1
 #include <regex>
 #include <iostream>
 #include <string>
@@ -15,6 +16,7 @@
 
 // TOML Parsing Lib
 #include "tomlplusplus/toml.hpp"
+
 
 // TODO: Add timestamping for output lines
 
@@ -35,23 +37,28 @@ const int MC_RCON_PORT = 25575;
 int main(int argc, char *argv[]){
 	// Read RCON configuration file
 	auto config = toml::parse_file(cp);
-	const string serveraddr = string(config["rcon"]["addr"].value_or(""sv));
-	const string serverpw = string(config["rcon"]["passwd"].value_or(""sv));
+	string serveraddr = string(config["rcon"]["addr"].value_or(""sv));
+	string serverpw = string(config["rcon"]["passwd"].value_or(""sv));
 	const int serverport = config["rcon"]["port"].value_or(MC_RCON_PORT);
 	bool serverempty = config["server"]["empty"].value_or(false);
-	// cout << "Server addr: " << serveraddr << '\n';
-	// cout << "Server empty flag: " << serverempty << "\n";
+	cout << "Server addr: " << serveraddr << '\n';
+	cout << "Server empty flag: " << serverempty << "\n";
 
 	// TODO: Open RCON connection
 	// TODO: Get number of players
 	srcon mcrcon = srcon(serveraddr, serverport, serverpw);
 	string response = mcrcon.send("list");
 
+	// cout << "Attempted to get RCON connection \n";
+	// string discard;
+	// std::cin >> discard;
+
 	// Regex number of players
 	/* Example Response:
 		There are 0 of a max of 20 players online:
 	*/
 	// string response { R"(There are 0 of a max of 20 players online:)" };
+	cout << "Response: " << response << '\n';
 	int playercount = 0;
 	regex pat{ R"((?:There are )([0-9]+))" };
 	smatch players;
