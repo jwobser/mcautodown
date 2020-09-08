@@ -19,28 +19,33 @@
 #include "tomlplusplus/toml.hpp"
 
 // TODO: Add timestamping for output lines
-// TODO: Open RCON connection
+// Socket operation
+// buffer of chars
+// find bytes 0-3 of size, etc
+// put in network (big endian) byte order
+// send buffer
+// https://www.boost.org/doc/libs/1_67_0/libs/beast/doc/html/beast/using_websocket/send_and_receive_messages.html
 
-// using boost::regex;
 using std::regex;
 using std::string;
 using std::string_view;
 using std::cout;
 using std::smatch;
-// using boost::smatch;
 using std::filesystem::exists;
 using std::filesystem::remove;
 using namespace std::literals;
 using namespace boost::asio::ip;
 // const int TIMEOUT {5};
-const std::filesystem::path confpath {"mcdown.toml"};
 const string cp = "mcdown.toml";
+const std::filesystem::path confpath {cp};
 const int MC_RCON_PORT = 25575;
+int packID = 1000;
 
 class rconpacket {
 	public:
 	rconpacket() :size{0}, ID{0}, type{0}, body{""} {};
-	rconpacket(int size, int ID, int type, string command);
+	rconpacket(int ID, int type, string command);
+	rconpacket(const string command);
 
 	private:
 	int32_t size = 0;
@@ -48,6 +53,13 @@ class rconpacket {
 	int32_t type = 0;
 	string body;
 };
+
+rconpacket::rconpacket(const string command){
+	size = 11 + command.length();
+	ID = ++packID;
+	type = 0;
+	body = command;
+}
 
 int main(int argc, char *argv[]){
 	boost::asio::io_context io_context;
@@ -64,7 +76,11 @@ int main(int argc, char *argv[]){
 
 	tcp::socket mysock(io_context);
 	tcp::endpoint server = tcp::endpoint(address::from_string(serveraddr), 25575);
-	// mysock.connect(tcp::endpoint(server));
+	mysock.connect(tcp::endpoint(server));
+	// rconpacket authpacket(++packID, 3, serverpw);
+
+	// Other Way to open socket
+	/*
 	mysock.open(boost::asio::ip::tcp::v4());
 	cout << "Opened \n";
 	boost::asio::ip::tcp::socket::reuse_address option(true);
@@ -72,9 +88,14 @@ int main(int argc, char *argv[]){
 	cout << "Set Reuse address option \n";
 	mysock.bind(server);
 	cout << "Bound \n";
+	*/
 	mysock.send(boost::asio::buffer("test"));
 	cout << "Sent \n";
+	/*
 	// boost::asio::connect(mysock, server);
+
+	*/
+
 	string command{"test"};
 	int packlen = 10 + command.length();
 	cout << "Message length: " << packlen << std::endl;
@@ -82,7 +103,6 @@ int main(int argc, char *argv[]){
 	cout << "Waiting for 1s." << std::endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	cout << "Finished Waiting." << std::endl;
-	
 
 
 
@@ -131,7 +151,7 @@ int main(int argc, char *argv[]){
 		*/
 
 		// TODO: notify discord
-	} 
+	}
 
 	std::fstream configfile;
 	string buffer;
@@ -145,7 +165,7 @@ int main(int argc, char *argv[]){
 			// go to beginning of line
 			configfile.seekg(-(1+buffer.length()),std::ios_base::cur);
 
-			/* Only change flag to empty if server runnign and empty
+			/* Only change flag to empty if server running and empty
 			 * Otherwise, reset to false. that way server will not turn
 			 * off immediately at next reboot
 			 */
